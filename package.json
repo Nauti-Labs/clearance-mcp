@@ -1,5 +1,5 @@
 {
-  "name": "@clearance/mcp",
+  "name": "clearance-mcp",
   "version": "1.0.0",
   "description": "MCP server for Clearance — human approval API for AI agent commerce",
   "main": "dist/index.js",

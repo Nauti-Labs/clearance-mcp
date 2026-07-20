@@ -1,4 +1,4 @@
-# @clearance/mcp
+# clearance-mcp
 
 > Model Context Protocol server for [Clearance](https://clearance.nauti-labs.com) — the human approval API for AI agent commerce.
 
@@ -22,13 +22,13 @@ An MCP server that exposes Clearance as a set of tools Claude (and other MCP-com
 ### Via npm (recommended)
 
 ```bash
-npm install -g @clearance/mcp
+npm install -g clearance-mcp
 ```
 
 Or run directly via npx:
 
 ```bash
-npx -y @clearance/mcp
+npx -y clearance-mcp
 ```
 
 ### Via GitHub (if npm not available)
@@ -50,7 +50,7 @@ Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_
   "mcpServers": {
     "clearance": {
       "command": "npx",
-      "args": ["-y", "@clearance/mcp"],
+      "args": ["-y", "clearance-mcp"],
       "env": {
         "CLEARANCE_API_KEY": "clr_live_..."
       }
