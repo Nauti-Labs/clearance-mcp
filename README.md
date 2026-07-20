@@ -19,6 +19,8 @@ An MCP server that exposes Clearance as a set of tools Claude (and other MCP-com
 
 ## Installation
 
+### Via npm (recommended)
+
 ```bash
 npm install -g @clearance/mcp
 ```
@@ -27,6 +29,12 @@ Or run directly via npx:
 
 ```bash
 npx -y @clearance/mcp
+```
+
+### Via GitHub (if npm not available)
+
+```bash
+npx -y github:Nauti-Labs/clearance-mcp
 ```
 
 ---
