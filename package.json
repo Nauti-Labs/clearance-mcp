@@ -1,0 +1,25 @@
+{
+  "name": "@clearance/mcp",
+  "version": "1.0.0",
+  "description": "MCP server for Clearance — human approval API for AI agent commerce",
+  "main": "dist/index.js",
+  "type": "module",
+  "bin": {
+    "clearance-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "keywords": ["mcp", "clearance", "approval", "agent", "ai", "payments"],
+  "author": "Nauti-Labs LLC",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0",
+    "@types/node": "^20.0.0"
+  }
+}
