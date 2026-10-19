@@ -1,4 +1,15 @@
-import type { ClearanceRequest, ClearanceResponse, ClearanceListResponse, VerifyTokenResponse, KeyCreateRequest, KeyCreateResponse, UsageResponse } from "./types.js";
+import type {
+  ClearanceListParams,
+  ClearanceRequest,
+  ClearanceResponse,
+  DecideRequest,
+  DecideResponse,
+  KeyCreateRequest,
+  KeyCreateResponse,
+  RevokeResponse,
+  UsageResponse,
+  VerifyTokenResponse,
+} from "./types.js";
 
 export class ClearanceClient {
   private baseUrl: string;
@@ -11,11 +22,7 @@ export class ClearanceClient {
     this.timeoutMs = timeoutMs;
   }
 
-  private async request<T>(
-    method: string,
-    path: string,
-    body?: unknown
-  ): Promise<T> {
+  private async request<T>(method: string, path: string, body?: unknown): Promise<T> {
     const url = `${this.baseUrl}${path}`;
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), this.timeoutMs);
@@ -27,23 +34,18 @@ export class ClearanceClient {
           "Content-Type": "application/json",
           "X-API-Key": this.apiKey,
         },
-        body: body ? JSON.stringify(body) : undefined,
+        body: body !== undefined ? JSON.stringify(body) : undefined,
         signal: controller.signal,
       });
 
-      clearTimeout(timeout);
-
       if (!response.ok) {
         const text = await response.text();
-        throw new Error(
-          `Clearance API error ${response.status}: ${text || response.statusText}`
-        );
+        throw new Error(`Clearance API error ${response.status}: ${text || response.statusText}`);
       }
 
       return (await response.json()) as T;
-    } catch (err) {
+    } finally {
       clearTimeout(timeout);
-      throw err;
     }
   }
 
@@ -55,25 +57,37 @@ export class ClearanceClient {
     return this.request<ClearanceResponse>("GET", `/v1/clearances/${encodeURIComponent(id)}`);
   }
 
-  async listClearances(params?: {
-    status?: string;
-    limit?: number;
-    offset?: number;
-  }): Promise<ClearanceListResponse> {
+  async listClearances(params?: ClearanceListParams): Promise<ClearanceResponse[]> {
     const query = new URLSearchParams();
     if (params?.status) query.set("status", params.status);
     if (params?.limit !== undefined) query.set("limit", String(params.limit));
-    if (params?.offset !== undefined) query.set("offset", String(params.offset));
     const qs = query.toString();
-    return this.request<ClearanceListResponse>("GET", `/v1/clearances${qs ? "?" + qs : ""}`);
+    return this.request<ClearanceResponse[]>("GET", `/v1/clearances${qs ? `?${qs}` : ""}`);
   }
 
-  async approveClearance(id: string): Promise<ClearanceResponse> {
-    return this.request<ClearanceResponse>("POST", `/v1/clearances/${encodeURIComponent(id)}/approve`);
+  /**
+   * Approve or deny a pending clearance.
+   * The API exposes POST /v1/clearances/{id}/decide, not /approve or /deny.
+   */
+  async decideClearance(id: string, approved: boolean, note?: string): Promise<DecideResponse> {
+    const body: DecideRequest = note !== undefined ? { approved, note } : { approved };
+    return this.request<DecideResponse>(
+      "POST",
+      `/v1/clearances/${encodeURIComponent(id)}/decide`,
+      body
+    );
   }
 
-  async denyClearance(id: string, reason?: string): Promise<ClearanceResponse> {
-    return this.request<ClearanceResponse>("POST", `/v1/clearances/${encodeURIComponent(id)}/deny`, { reason });
+  async approveClearance(id: string, note?: string): Promise<DecideResponse> {
+    return this.decideClearance(id, true, note);
+  }
+
+  async denyClearance(id: string, note?: string): Promise<DecideResponse> {
+    return this.decideClearance(id, false, note);
+  }
+
+  async revokeClearance(id: string): Promise<RevokeResponse> {
+    return this.request<RevokeResponse>("POST", `/v1/clearances/${encodeURIComponent(id)}/revoke`);
   }
 
   async verifyToken(token: string): Promise<VerifyTokenResponse> {

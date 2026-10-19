@@ -1,78 +1,87 @@
-// Clearance API types
+// Types for the live Clearance API (https://clearance.nauti-labs.com/openapi.json).
+
+export type ClearanceStatus = "pending" | "approved" | "denied" | "expired" | "revoked";
+
+export type Tier = "starter" | "pro" | "scale";
 
 export interface ClearanceRequest {
   title: string;
-  scope?: string;
+  scope: string;
+  description?: string;
   budget_amount?: number;
   budget_currency?: string;
+  callback_url?: string;
   metadata?: Record<string, unknown>;
-  webhook_url?: string;
+  expires_in?: number;
 }
 
 export interface ClearanceResponse {
   id: string;
+  status: ClearanceStatus;
   title: string;
-  scope: string | null;
+  description: string | null;
+  scope: string;
   budget_amount: number | null;
   budget_currency: string | null;
-  status: "pending" | "approved" | "denied" | "revoked";
-  approve_url: string;
-  deny_url: string;
-  token: string | null;
+  approval_url: string;
+  token?: string | null;
+  callback_url: string | null;
   metadata: Record<string, unknown> | null;
   created_at: string;
-  approved_at: string | null;
-  denied_at: string | null;
-  denied_reason: string | null;
+  expires_at: string;
+  decided_at: string | null;
 }
 
-export interface ClearanceListResponse {
-  items: ClearanceResponse[];
-  total: number;
-  limit: number;
-  offset: number;
+export interface DecideRequest {
+  approved: boolean;
+  note?: string;
+}
+
+export interface DecideResponse {
+  id: string;
+  status: "approved" | "denied";
+  decided_at: string;
+  token: string | null;
+}
+
+export interface RevokeResponse {
+  id: string;
+  status: "revoked";
 }
 
 export interface VerifyTokenResponse {
   valid: boolean;
-  clearance_id: string;
-  status: string;
-  created_at: string;
-  approved_at: string | null;
-  metadata: Record<string, unknown> | null;
+  clearance_id?: string | null;
+  scope?: string | null;
+  budget_amount?: number | null;
+  budget_currency?: string | null;
+  approved_at?: string | null;
+  expires_at?: string | null;
+  error?: string | null;
 }
 
 export interface KeyCreateRequest {
-  tier?: string;
-  email?: string;
+  email: string;
+  name?: string;
 }
 
 export interface KeyCreateResponse {
-  key: string;
-  tier: string;
-  clearances_per_month: number;
-  created_at: string;
+  api_key: string;
+  tier: Tier;
+  credits_remaining: number;
+  message: string;
 }
 
 export interface UsageResponse {
-  tier: string;
-  clearances_per_month: number;
-  used_this_month: number;
-  remaining_this_month: number;
-  reset_date: string;
+  tier: Tier;
+  credits_used: number;
+  credits_remaining: number;
+  clearances_this_month: number;
+  period_start: string;
+  period_end: string;
 }
 
-export interface ClearanceApproveRequest {
-  id: string;
-}
-
-export interface ClearanceDenyRequest {
-  id: string;
-  reason?: string;
-}
-
-export interface ClearanceListRequest {
+export interface ClearanceListParams {
   status?: string;
   limit?: number;
-  offset?: number;
 }
