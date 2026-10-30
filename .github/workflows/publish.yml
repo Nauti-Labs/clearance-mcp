@@ -1,0 +1,47 @@
+# Publishes clearance-mcp to npm when a v* tag is pushed.
+# Requires the repository secret NPM_TOKEN: an npm automation token, or a
+# granular access token with publish permission for this package.
+# This workflow does not create that secret. Add it in GitHub under
+# Settings → Secrets and variables → Actions before tagging a release.
+# The npm package owner must also approve the publish from their npm account.
+
+name: Publish
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          registry-url: https://registry.npmjs.org
+      - run: npm ci
+      - run: npm run build
+      - run: npm test
+      - name: Require the tag to match package.json
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          version="$(node -p "require('./package.json').version")"
+          if [ "$tag" != "$version" ]; then
+            echo "Tag ${GITHUB_REF_NAME} does not match package.json version ${version}."
+            exit 1
+          fi
+      - name: Publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -z "${NODE_AUTH_TOKEN}" ]; then
+            echo "NPM_TOKEN is not set. The package owner must add an npm token as the NPM_TOKEN Actions secret before this tag can publish."
+            exit 1
+          fi
+          npm publish

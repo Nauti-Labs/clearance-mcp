@@ -40,6 +40,15 @@ function lastCall() {
   return calls[0];
 }
 
+describe("client defaults", () => {
+  it("calls the hosted Clearance API when no base URL is passed", async () => {
+    installFetch(200, []);
+    const api = new ClearanceClient(API_KEY);
+    await api.listClearances();
+    assert.equal(lastCall().url, "https://clearance.nauti-labs.com/v1/clearances");
+  });
+});
+
 describe("tool catalog", () => {
   it("exposes every Clearance tool the server implements", () => {
     assert.deepEqual(
