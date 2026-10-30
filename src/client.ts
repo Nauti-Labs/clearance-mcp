@@ -1,3 +1,4 @@
+import { DEFAULT_API_URL } from "./config.js";
 import type {
   ClearanceListParams,
   ClearanceRequest,
@@ -11,12 +12,26 @@ import type {
   VerifyTokenResponse,
 } from "./types.js";
 
-export class ClearanceClient {
+/** Methods the MCP tools call. Live and offline clients both implement this. */
+export interface ClearanceApi {
+  createClearance(data: ClearanceRequest): Promise<ClearanceResponse>;
+  getClearance(id: string): Promise<ClearanceResponse>;
+  listClearances(params?: ClearanceListParams): Promise<ClearanceResponse[]>;
+  decideClearance(id: string, approved: boolean, note?: string): Promise<DecideResponse>;
+  approveClearance(id: string, note?: string): Promise<DecideResponse>;
+  denyClearance(id: string, note?: string): Promise<DecideResponse>;
+  revokeClearance(id: string): Promise<RevokeResponse>;
+  verifyToken(token: string): Promise<VerifyTokenResponse>;
+  createKey(data: KeyCreateRequest): Promise<KeyCreateResponse>;
+  getUsage(): Promise<UsageResponse>;
+}
+
+export class ClearanceClient implements ClearanceApi {
   private baseUrl: string;
   private apiKey: string;
   private timeoutMs: number;
 
-  constructor(apiKey: string, baseUrl = "https://clearance.nauti-labs.com", timeoutMs = 10000) {
+  constructor(apiKey: string, baseUrl = DEFAULT_API_URL, timeoutMs = 10000) {
     this.apiKey = apiKey;
     this.baseUrl = baseUrl.replace(/\/$/, "");
     this.timeoutMs = timeoutMs;

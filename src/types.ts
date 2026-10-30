@@ -1,4 +1,5 @@
-// Types for the live Clearance API (https://clearance.nauti-labs.com/openapi.json).
+// Types for the Clearance HTTP API.
+// The default origin is https://clearance.nauti-labs.com; override it with CLEARANCE_API_URL.
 
 export type ClearanceStatus = "pending" | "approved" | "denied" | "expired" | "revoked";
 

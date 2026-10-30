@@ -1,5 +1,5 @@
 import type { CallToolResult, Tool } from "@modelcontextprotocol/sdk/types.js";
-import { ClearanceClient } from "./client.js";
+import type { ClearanceApi } from "./client.js";
 import type { ClearanceRequest, KeyCreateRequest } from "./types.js";
 
 const CLEARANCE_STATUSES = ["pending", "approved", "denied", "expired", "revoked"] as const;
@@ -250,7 +250,7 @@ function jsonResult(result: unknown): CallToolResult {
 }
 
 export async function handleToolCall(
-  client: ClearanceClient,
+  client: ClearanceApi,
   name: string,
   rawArgs?: Record<string, unknown>
 ): Promise<CallToolResult> {
